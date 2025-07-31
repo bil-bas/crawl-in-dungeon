@@ -209,9 +209,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Monkey, function on_on_overlap4(
 
 // Creat player sprite.
 function create_wizard(): Sprite {
-    let wiz = sprites.create(assets.image`
-        Wiz
-        `, SpriteKind.Player)
+    let wiz = sprites.create(assets.image`wizard`, SpriteKind.Player)
     info.setLife(3)
     scene.cameraFollowSprite(wiz)
     characterAnimations.loopFrames(wiz, [img`
@@ -586,7 +584,6 @@ function render_walls() {
             tiles.tileAtLocationEquals(location, sprites.dungeon.stairLadder)) {
             tiles.setWallAt(location, true)
         }
-
     })
 }
 
@@ -636,24 +633,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function on_a_pressed() {
 
     if (characterAnimations.matchesRule(wizard, characterAnimations.rule(Predicate.MovingRight)) ||
         characterAnimations.matchesRule(wizard, characterAnimations.rule(Predicate.NotMoving, Predicate.FacingRight))) {
-        projectile = sprites.createProjectileFromSprite(img`
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . 2 2 2 2 . . .
-                . . . . . . . 2 2 1 1 1 1 2 . .
-                . . . . 2 2 3 3 1 1 1 1 1 1 . .
-                . . 3 3 3 3 1 1 1 1 1 1 1 1 . .
-                . . 1 1 1 1 1 1 1 1 1 1 1 1 . .
-                . . 3 3 2 2 3 1 1 1 1 1 1 1 . .
-                . . . . . . 2 2 3 1 1 1 1 2 . .
-                . . . . . . . . . 2 2 2 2 . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                `, wizard, 100, 0)
+        projectile = sprites.createProjectileFromSprite(assets.image`fireball right`, wizard, 100, 0)
     } else if (characterAnimations.matchesRule(wizard, characterAnimations.rule(Predicate.MovingLeft)) ||
         characterAnimations.matchesRule(wizard, characterAnimations.rule(Predicate.NotMoving, Predicate.FacingLeft))) {
         projectile = sprites.createProjectileFromSprite(img`
