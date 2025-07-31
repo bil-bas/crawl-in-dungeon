@@ -44,6 +44,14 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`key`, function on_overlap_til
     info.changeLifeBy(1)
 })
 
+// Player picks up MANA POTION
+scene.onOverlapTile(SpriteKind.Player, assets.tile`key`, (sprite, location) => {
+    clearTile(location)
+    music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.InBackground)
+    mana += 1
+    update_labels()
+})
+
 // Player picks up KEY
 scene.onOverlapTile(SpriteKind.Player, assets.tile`key`, function on_overlap_tile2(sprite: Sprite, location: tiles.Location) {
     clearTile(location)
@@ -58,7 +66,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`key`, function on_overlap_til
 scene.onHitWall(SpriteKind.Player, function on_hit_wall(sprite: Sprite, location: tiles.Location) {
     if (tiles.tileAtLocationEquals(location, sprites.dungeon.doorClosedNorth) && keys >= 1) {
         keys += -1
-        tiles.setTileAt(location, assets.tile`transparency16`)
+        clearTile(location)
         music.play(music.melodyPlayable(music.knock), music.PlaybackMode.InBackground)
         tiles.setWallAt(location, false)
         update_labels()
@@ -71,7 +79,7 @@ scene.onHitWall(SpriteKind.Player, function on_hit_wall(sprite: Sprite, location
     }
 })
 
-// Player Overlaps - FIGHT ENEMY
+// Player Overlaps ENEMY
 
 // Player overlaps SNAIL
 sprites.onOverlap(SpriteKind.Player, SpriteKind.BossSnail, function on_on_overlap(sprite: Sprite, otherSprite: Sprite) {
@@ -86,24 +94,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Bat, function on_on_overlap2(spr
     sprites.destroy(otherSprite)
     game.setGameOverMessage(false, "Exsanguinated by a vampire!")
     info.changeLifeBy(-1)
-    change_floater(img`
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . f f f . f f f . . . .
-            . . . . f 3 3 3 f 3 3 3 f . . .
-            . . . . f 3 3 3 3 3 1 3 f . . .
-            . . . . f 3 3 3 3 3 3 3 f . . .
-            . . . . . f 3 b b b 3 f . . . .
-            . . . . . f f b b b f f . . . .
-            . . . . . . f f b f f . . . . .
-            . . . . . . . f f f . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            `, -1)
+    change_floater(assets.image`life`, -1)
 })
 
 // Player overlaps GHOST
@@ -112,46 +103,12 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Ghost, function on_on_overlap3(s
     sprites.destroy(otherSprite)
     if (mana) {
         mana -= 1
-        change_floater(img`
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . 2 2 . . . . . . .
-                . . . . . . 3 1 1 3 . . . . . .
-                . . . . . 2 1 1 1 1 2 . . . . .
-                . . . . . 2 1 1 1 1 2 . . . . .
-                . . . . . . 3 1 1 3 . . . . . .
-                . . . . . . . 2 2 . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                `, -1)
+        change_floater(assets.image`mana`, -1)
         update_labels()
     } else {
         game.setGameOverMessage(false, "Soul drained by a ghost!")
         info.changeLifeBy(-1)
-        change_floater(img`
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . f f f . f f f . . . .
-                . . . . f 3 3 3 f 3 3 3 f . . .
-                . . . . f 3 3 3 3 3 1 3 f . . .
-                . . . . f 3 3 3 3 3 3 3 f . . .
-                . . . . . f 3 b b b 3 f . . . .
-                . . . . . f f b b b f f . . . .
-                . . . . . . f f b f f . . . . .
-                . . . . . . . f f f . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                `, -1)
+        change_floater(assets.image`life`, -1)
     }
 
 })
@@ -210,23 +167,23 @@ function create_wizard(): Sprite {
     info.setLife(3)
     scene.cameraFollowSprite(wiz)
     characterAnimations.loopFrames(wiz, [img`
-            . . . . . . c c c . . . . . . .
-            . . . . . . c 5 b c . . . . . .
-            . . . . c c c 5 5 c c c . . . .
-            . . c c c c 5 5 5 5 c b c c . .
-            . c b b 5 b 5 5 5 5 b 5 b b c .
-            . c b 5 5 b b 5 5 b b 5 5 b c .
-            . . c 5 5 5 b b b b 5 5 5 f . .
-            . . f f 5 5 5 5 5 5 5 5 f f . .
-            . . f f f f f f f f f f f f . .
-            . . f f f f f f f f f f f f . .
-            . . . f f f f f f f f f f . . .
-            . . . e e f f f f f f f e . . .
-            . . e b f b 5 b b 5 b c b e . .
-            . . e e f 5 5 5 5 5 5 f e e . .
-            . . . . c b 5 5 5 5 b c . . . .
-            . . . . . f f f f f f . . . . .
-        `, img`
+        . . . . . . c c c . . . . . . .
+        . . . . . . c 5 b c . . . . . .
+        . . . . c c c 5 5 c c c . . . .
+        . . c c c c 5 5 5 5 c b c c . .
+        . c b b 5 b 5 5 5 5 b 5 b b c .
+        . c b 5 5 b b 5 5 b b 5 5 b c .
+        . . c 5 5 5 b b b b 5 5 5 f . .
+        . . f f 5 5 5 5 5 5 5 5 f f . .
+        . . f f f f f f f f f f f f . .
+        . . f f f f f f f f f f f f . .
+        . . . f f f f f f f f f f . . .
+        . . . e e f f f f f f f e . . .
+        . . e b f b 5 b b 5 b c b e . .
+        . . e e f 5 5 5 5 5 5 f e e . .
+        . . . . c b 5 5 5 5 b c . . . .
+        . . . . . f f f f f f . . . . .
+    `, img`
                 . . . . . . . . . . . . . . . .
                 . . . . . . . . c c . . . . . .
                 . . . . . . . c 5 c . . . . . .
@@ -562,7 +519,7 @@ function create_wizard(): Sprite {
 
 // Render the level tiles, add player and creatues.
 function render_walls() {
-    tileUtil.forEachTileInMap(tileUtil.currentTilemap(), function on_for_each_tile_in_map(column: number, row: number, location: tiles.Location) {
+    tileUtil.forEachTileInMap(tileUtil.currentTilemap(), (column: number, row: number, location: tiles.Location) => {
         if (tiles.tileAtLocationIsWall(location)) {
             tiles.setTileAt(location, sprites.builtin.brick)
         } else if (tiles.tileAtLocationEquals(location, sprites.dungeon.stairLarge)) {
