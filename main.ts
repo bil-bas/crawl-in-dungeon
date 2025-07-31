@@ -25,30 +25,30 @@ function change_floater(icon: Image, change: number) {
 }
 
 // Create stat label for top of screen.
-function create_label(Icon: Image, Y: number): TextSprite {
+function create_label(icon: Image, x: number): TextSprite {
     let label = textsprite.create("x0", 0, 1)
-    label.setIcon(Icon)
+    label.setIcon(icon)
     label.setOutline(1, 6)
     label.setFlag(SpriteFlag.RelativeToCamera, true)
     label.top = 0
-    label.left = Y
+    label.left = x
     return label
 }
 
 // Player Overlaps - PICK UP
 
-// Player picjs up LIFE POTION
-scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile0`, function on_overlap_tile(sprite: Sprite, location: tiles.Location) {
+// Player picks up LIFE POTION
+scene.onOverlapTile(SpriteKind.Player, assets.tile`key`, function on_overlap_tile(sprite: Sprite, location: tiles.Location) {
     clearTile(location)
     music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.InBackground)
     info.changeLifeBy(1)
 })
 
 // Player picks up KEY
-scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile`, function on_overlap_tile2(sprite: Sprite, location: tiles.Location) {
+scene.onOverlapTile(SpriteKind.Player, assets.tile`key`, function on_overlap_tile2(sprite: Sprite, location: tiles.Location) {
     clearTile(location)
     music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.InBackground)
-    Keys += 1
+    keys += 1
     update_labels()
 })
 
@@ -56,21 +56,19 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile`, function on_overlap_
 
 // Player tries to unlock door/chest
 scene.onHitWall(SpriteKind.Player, function on_hit_wall(sprite: Sprite, location: tiles.Location) {
-
-    if (tiles.tileAtLocationEquals(location, sprites.dungeon.doorClosedNorth) && Keys >= 1) {
-        Keys += -1
+    if (tiles.tileAtLocationEquals(location, sprites.dungeon.doorClosedNorth) && keys >= 1) {
+        keys += -1
         tiles.setTileAt(location, assets.tile`transparency16`)
         music.play(music.melodyPlayable(music.knock), music.PlaybackMode.InBackground)
         tiles.setWallAt(location, false)
         update_labels()
-    } else if (tiles.tileAtLocationEquals(location, sprites.dungeon.chestClosed) && Keys >= 1) {
-        Keys += -1
+    } else if (tiles.tileAtLocationEquals(location, sprites.dungeon.chestClosed) && keys >= 1) {
+        keys += -1
         tiles.setTileAt(location, sprites.dungeon.chestOpen)
         music.play(music.melodyPlayable(music.knock), music.PlaybackMode.InBackground)
         coins += 10
         update_labels()
     }
-
 })
 
 // Player Overlaps - FIGHT ENEMY
@@ -160,11 +158,10 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Ghost, function on_on_overlap3(s
 
 // Player overlaps MONKEY
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Monkey, function on_on_overlap4(sprite7: Sprite, otherSprite4: Sprite) {
-
     music.play(music.melodyPlayable(music.thump), music.PlaybackMode.InBackground)
     sprites.destroy(otherSprite4)
-    if (Keys) {
-        Keys -= 1
+    if (keys) {
+        keys -= 1
         change_floater(img`
                 . . . . 5 5 5 5 . . . .
                 . . . 5 e e e e e . . .
@@ -580,8 +577,8 @@ function render_walls() {
         } else if (tiles.tileAtLocationEquals(location, tileUtil.object14)) {
             create_boss(location)
         } else if (tiles.tileAtLocationEquals(location, sprites.dungeon.chestClosed) ||
-            tiles.tileAtLocationEquals(location, sprites.dungeon.doorClosedNorth) ||
-            tiles.tileAtLocationEquals(location, sprites.dungeon.stairLadder)) {
+            	tiles.tileAtLocationEquals(location, sprites.dungeon.doorClosedNorth) ||
+            	tiles.tileAtLocationEquals(location, sprites.dungeon.stairLadder)) {
             tiles.setWallAt(location, true)
         }
     })
@@ -605,7 +602,7 @@ scene.onHitWall(SpriteKind.BossSnail, function on_hit_wall2(sprite: Sprite, loca
 
 // Cast starfire pulses
 controller.B.onEvent(ControllerButtonEvent.Pressed, function on_b_pressed() {
-    if (mana < STARFIRE_COST || falling) return
+    if (mana < STARFIRE_COST || is_falling) return
 
     mana -= STARFIRE_COST
     update_labels()
@@ -614,19 +611,18 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function on_b_pressed() {
 
     timer.after(200, function on_after() {
         Starfire()
+
         timer.after(200, function on_after2() {
             Starfire()
         })
     })
-
-
 })
 
 // Cast fireball
 controller.A.onEvent(ControllerButtonEvent.Pressed, function on_a_pressed() {
     let projectile: Sprite
 
-    if (mana < FIREBALL_COST || falling) return
+    if (mana < FIREBALL_COST || is_falling) return
 
     mana -= FIREBALL_COST
     update_labels()
@@ -1879,7 +1875,7 @@ function create_monkey(tile: tiles.Location) {
 
 function update_labels() {
     magic_label.setText(`x${mana}`)
-    key_label.setText(`x${Keys}`)
+    key_label.setText(`x${keys}`)
     coin_label.setText(`x${coins}`)
 }
 
@@ -1891,9 +1887,8 @@ function advance_level() {
     render_walls()
 }
 
-
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile2`, function on_overlap_tile3(sprite: Sprite, location: tiles.Location) {
-    tiles.setTileAt(location, assets.tile`transparency16`)
+    clearTile(location)
     music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.InBackground)
     mana += 1
     update_labels()
@@ -1905,19 +1900,21 @@ info.onLifeZero(function on_life_zero() {
 })
 
 scene.onOverlapTile(SpriteKind.Player, sprites.dungeon.hazardHole, function on_overlap_tile4(sprite: Sprite, location: tiles.Location) {
-    if (!falling) {
-        falling = true
+    if (!is_falling) {
+        is_falling = true
         controller.moveSprite(sprite, 0, 0)
         tiles.placeOnTile(sprite, location)
+
         timer.after(250, function on_after4() {
             music.play(music.melodyPlayable(music.jumpDown), music.PlaybackMode.InBackground)
             sprite.setScale(0.75, ScaleAnchor.Middle)
+
             timer.after(500, function on_after5() {
                 sprite.setScale(0.5, ScaleAnchor.Middle)
-                timer.after(500, function on_after6() {
 
+                timer.after(500, function on_after6() {
                     advance_level()
-                    falling = false
+                    is_falling = false
                 })
             })
         })
@@ -1968,19 +1965,19 @@ function init_inventory() {
     magic_label.z += 100
 
     coin_label = create_label(img`
-            . . . . . . . . . . . .
-            . . . . . . . . . . . .
-            . . . . b b b b . . . .
-            . . . b 5 5 5 5 b . . .
-            . . b 5 d 3 3 d 5 b . .
-            . . b 5 3 5 5 1 5 b . .
-            . . c 5 3 5 5 1 d c . .
-            . . c d d 1 1 d d c . .
-            . . . f d d d d f . . .
-            . . . . . . . . . . . .
-            . . . . . . . . . . . .
-            . . . . . . . . . . . .
-            `, 115)
+        . . . . . . . . . . . .
+        . . . . . . . . . . . .
+        . . . . b b b b . . . .
+        . . . b 5 5 5 5 b . . .
+        . . b 5 d 3 3 d 5 b . .
+        . . b 5 3 5 5 1 5 b . .
+        . . c 5 3 5 5 1 d c . .
+        . . c d d 1 1 d d c . .
+        . . . f d d d d f . . .
+        . . . . f f f f . . . .
+        . . . . . . . . . . . .
+        . . . . . . . . . . . .
+    `, 115)
     coin_label.z += 100
 
     update_labels()
@@ -1997,11 +1994,15 @@ let key_label: TextSprite = null
 let magic_label: TextSprite = null
 let mana = INITIAL_MANA
 let coins = 0
-let Keys = 0
-let falling = false
+let keys = 0
+let is_falling = false
 let current_level = -1
 
-const levels = [tilemap`level_0`, tilemap`level_1`, tilemap`level_2`]
+const levels = [
+    tilemap`level_0`,
+    tilemap`level 1`,
+    tilemap`level_2`
+]
 const wizard: Sprite = create_wizard()
 
 game.setGameOverScoringType(game.ScoringType.HighScore)
