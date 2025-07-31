@@ -1,5 +1,5 @@
 namespace SpriteKind {
-    export const BossSnail = SpriteKind.create()
+    export const Snail = SpriteKind.create()
     export const Ghost = SpriteKind.create()
     export const Bat = SpriteKind.create()
     export const Monkey = SpriteKind.create()
@@ -63,7 +63,7 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`key`, function on_overlap_til
 // Player Overlaps - INTERACT
 
 // Player tries to unlock door/chest
-scene.onHitWall(SpriteKind.Player, function on_hit_wall(sprite: Sprite, location: tiles.Location) {
+scene.onHitWall(SpriteKind.Player, (sprite: Sprite, location: tiles.Location) => {
     if (tiles.tileAtLocationEquals(location, sprites.dungeon.doorClosedNorth) && keys >= 1) {
         keys += -1
         clearTile(location)
@@ -82,14 +82,14 @@ scene.onHitWall(SpriteKind.Player, function on_hit_wall(sprite: Sprite, location
 // Player Overlaps ENEMY
 
 // Player overlaps SNAIL
-sprites.onOverlap(SpriteKind.Player, SpriteKind.BossSnail, function on_on_overlap(sprite: Sprite, otherSprite: Sprite) {
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Snail, (sprite: Sprite, otherSprite: Sprite) => {
     music.play(music.melodyPlayable(music.bigCrash), music.PlaybackMode.InBackground)
     game.setGameOverMessage(false, "Slimed by the boss snail!")
     info.changeLifeBy(-10)
 })
 
 // Player overlaps BAT
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Bat, function on_on_overlap2(sprite: Sprite, otherSprite: Sprite) {
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Bat, (sprite: Sprite, otherSprite: Sprite) => {
     music.play(music.melodyPlayable(music.smallCrash), music.PlaybackMode.InBackground)
     sprites.destroy(otherSprite)
     game.setGameOverMessage(false, "Exsanguinated by a vampire!")
@@ -534,8 +534,8 @@ function render_walls() {
         } else if (tiles.tileAtLocationEquals(location, tileUtil.object14)) {
             create_boss(location)
         } else if (tiles.tileAtLocationEquals(location, sprites.dungeon.chestClosed) ||
-            	tiles.tileAtLocationEquals(location, sprites.dungeon.doorClosedNorth) ||
-            	tiles.tileAtLocationEquals(location, sprites.dungeon.stairLadder)) {
+            tiles.tileAtLocationEquals(location, sprites.dungeon.doorClosedNorth) ||
+            tiles.tileAtLocationEquals(location, sprites.dungeon.stairLadder)) {
             tiles.setWallAt(location, true)
         }
     })
@@ -543,7 +543,7 @@ function render_walls() {
 
 // Enemy interactions
 
-scene.onHitWall(SpriteKind.BossSnail, function on_hit_wall2(sprite: Sprite, location: tiles.Location) {
+scene.onHitWall(SpriteKind.Snail, function on_hit_wall2(sprite: Sprite, location: tiles.Location) {
     if (characterAnimations.matchesRule(sprite, characterAnimations.rule(Predicate.MovingUp))) {
         sprite.setVelocity(-30, 0)
     } else if (characterAnimations.matchesRule(sprite, characterAnimations.rule(Predicate.MovingDown))) {
@@ -749,7 +749,7 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Bat, function on_on_overlap6
 })
 
 // Fireball hits SNAIL
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.BossSnail, function on_on_overlap7(sprite: Sprite, otherSprite: Sprite) {
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Snail, function on_on_overlap7(sprite: Sprite, otherSprite: Sprite) {
     sprites.destroy(sprite)
 })
 
@@ -1011,7 +1011,7 @@ function create_boss(tile: tiles.Location) {
             c 5 5 5 c 4 c 5 5 5 c 4 c 5 c .
             c 5 5 5 5 c 5 5 5 5 c 4 c 5 c .
             . c c c c c c c c c . . c c c .
-            `, SpriteKind.BossSnail)
+            `, SpriteKind.Snail)
     tiles.placeOnTile(mySprite, tile)
     mySprite.vy = 30
     mySprite.setScale(2, ScaleAnchor.Middle)
