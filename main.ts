@@ -19,8 +19,8 @@ function change_floater(icon: Image, change: number) {
     textSprite.setIcon(icon)
     textSprite.z = 99
     textSprite.setPosition(wizard.x, wizard.y)
-    timer.after(500, function on_after3() {
-        sprites.destroy(textSprite, effects.disintegrate, 500)
+    timer.after(500, () => {
+        sprites.destroy(textSprite)
     })
 }
 
